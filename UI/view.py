@@ -30,13 +30,13 @@ class View(ft.UserControl):
         # text fields
         # prima le inizializzo la roba da mettere nei dropdown
 
-        self.txt_name = ft.Dropdown(label="Anno", width=200, options=[ft.dropdown.Option(key="", text="Nessun filtro")])
+        self.txt_name = ft.Dropdown(label="Anno", width=200, options=[ft.dropdown.Option(key=None, text="Nessun filtro")])
         self._controller.handle_add_anni()
         self.txt_container = ft.Dropdown(label="Brand", width=400,
-                                         options=[ft.dropdown.Option(key="", text="Nessun filtro")])
+                                         options=[ft.dropdown.Option(key=None, text="Nessun filtro")])
         self._controller.handle_add_brand()
-        self.txt_field = ft.Dropdown(label="Retailer", width=400,
-                                     options=[ft.dropdown.Option(key="", text="Nessun filtro")])
+        self.txt_field = ft.Dropdown(label="Retailer", width=420,
+                                     options=[ft.dropdown.Option(key=None, text="Nessun filtro")])
         self._controller.handle_add_retailer()
         row1 = ft.Row([self.txt_name, self.txt_container, self.txt_field], alignment=ft.MainAxisAlignment.CENTER)
         self._page.controls.append(row1)

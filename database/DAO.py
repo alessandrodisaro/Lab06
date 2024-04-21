@@ -1,5 +1,6 @@
 from database.DB_connect import DBConnect
 from model.retailer import Retailer
+from model.vendite import Vendite
 
 
 class DAO():
@@ -53,3 +54,53 @@ class DAO():
             return result
         else:
             return None
+
+    def estrai_top_vendite(self, anno, brand, retailer):
+        conn = DBConnect.get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # query = """SELECT * FROM go_daily_sales
+        #         WHERE year(Date)= %s and Retailer_code =%s and Product_number
+        #          in (select Product_number from go_products where Product_brand=%s)"""
+        # questa riga sopra per ualche ragione e' moolto piu lenta
+        query = """SELECT * FROM go_daily_sales gds, go_products gp
+                    WHERE year(Date)=coalesce( %s,year(Date)) and Retailer_code =coalesce(%s,Retailer_code)
+                    and gds.Product_number = gp.Product_number
+                    and gp.Product_brand=coalesce(%s,Product_brand)"""
+        cursor.execute(query, (anno, retailer, brand))
+        vendite = []
+        for row in cursor:
+            vendite.append(Vendite(row["Date"], row["Unit_sale_price"], row["Quantity"],
+                                   row["Retailer_code"], row["Product_number"]))
+        if vendite is not None:
+            vendite.sort(reverse=True)
+        else:
+            print("Query vuota")
+        if len(vendite) >= 5:
+            result = vendite[0:5]
+        else:
+            result = vendite[0:len(vendite)]
+        cursor.close()
+        conn.close()
+        return result
+
+    def analizza_vendite(self, anno, brand, retailer):
+        cnx = DBConnect.get_connection()
+        cursor = cnx.cursor()
+        # query = """SELECT *  FROM go_daily_sales gds,go_products gp
+        #             WHERE year(Date)= coalesce(%s,year(Date)) and Retailer_code=(%s,Retailer_code)
+        #             and Product_number in (select Product_number from go_products where Product_brand=(%s,Product_brand))"""
+        query = """SELECT * FROM go_daily_sales gds, go_products gp
+                    WHERE year(Date)=coalesce( %s,year(Date)) and Retailer_code =coalesce(%s,Retailer_code)
+                    and gds.Product_number = gp.Product_number
+                    and gp.Product_brand=coalesce(%s,Product_brand)"""
+        cursor.execute(query, (anno, retailer, brand))
+        result = []
+        for row in cursor:
+            result.append(Vendite(row[3], row[6], row[4], row[0],
+                                  row[1]))
+        if result is None:
+            print("Query vuota")
+        cursor.close()
+        cnx.close()
+        return result
